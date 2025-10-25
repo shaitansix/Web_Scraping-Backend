@@ -10,11 +10,26 @@ router = APIRouter(prefix = '/scrap', tags = ['scrap'])
 
 @router.get('/')
 async def start(url: str): 
-  options = webdriver.ChromeOptions()
-  options.add_argument('-headless')
-
-  driver = webdriver.Chrome(options = options)
   try: 
+    options = webdriver.ChromeOptions()
+
+    # Configuraciones esenciales para Docker
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--remote-debugging-port=9222')
+    
+    # Solucionar el error del user-data-dir
+    options.add_argument('--user-data-dir=/tmp/chrome-profile')
+    
+    # Otros argumentos recomendados
+    options.add_argument('--window-size=1920,1080')
+    options.add_argument('--disable-extensions')
+    options.add_argument('--disable-software-rasterizer')
+
+    driver = webdriver.Chrome(options = options)
+
     driver.get(url)
     images = WebDriverWait(driver, 10).until(
       EC.presence_of_all_elements_located((By.XPATH, '//div[@class="image_container"]'))
